@@ -1,0 +1,256 @@
+---
+title: "Stat385Midterm"
+author: "cw"
+date: "7/9/2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# `Chi-squared Distribution (central or non-central)` was selected for the task
+
+## Create a generic function
+```{r}
+chisq = function(x, df, ...){
+  UseMethod("chisq")
+}
+mdist = function(x, df, ...){
+  UseMethod("mdist")
+}
+vdist = function(x, df, ...){
+  UseMethod("vdist")
+}
+ddist = function(x, df, ...){
+  UseMethod("ddist")
+}
+pdist = function(x, df, ...){
+  UseMethod("pdist")
+}
+qdist = function(x, df, ...){
+  UseMethod("qdist")
+}
+rdist = function(x, df, ...){
+  UseMethod("rdist")
+}
+```
+
+## Define the generic.default function
+I considered to use `if/else if` to discuss the different value of `x`. However, it seems like `R` handles different value of `x` (such as negaive value) very well, so I exclude the `if/else if` for parsimony.
+```{r}
+chisq.default = function(x, df, ncp = 0, log = FALSE, lower.tail = TRUE, log.p = FALSE) {
+  df = df
+  mean = df + ncp
+  variance = 2*(df + 2*ncp)
+  density = dchisq(x, df, ncp = 0, log = FALSE)
+  probability = pchisq(x, df, ncp = 0, lower.tail = TRUE, log.p = FALSE)
+  quantile = qchisq(x, df, ncp = 0, lower.tail = TRUE, log.p = FALSE)
+  random_gen = rchisq(x, df, ncp = 0)
+  return(structure(list(df = df,
+                        mean = mean, 
+                        variance = variance,
+                        density = density,
+                        probability = probability,
+                        quantile = quantile,
+                        random_gen = random_gen), 
+                   class = "chisq"))
+}
+```
+## Define mdist.chisq()
+```{r}
+mdist.chisq = function(object, ...){
+  mean = object$mean
+  return(structure(list(mean = mean), class = "mdist.chisq"))
+}
+```
+## Define vdist.chisq()
+```{r}
+vdist.chisq = function(object, ...){
+  variance = (object$variance)
+  return(structure(list(variance = variance), class = "vdist.chisq"))
+}
+```
+## Define ddist.chisq()
+```{r}
+ddist.chisq = function(object, ...){
+  density = object$density
+  return(structure(list(density = density), class = "ddist.chisq"))
+}
+```
+## Define pdist.chisq()
+```{r}
+pdist.chisq = function(object, ...){
+  probability = object$probability
+  return(structure(list(probability = probability), class = "pdist.chisq"))
+}
+```
+## Define qdist.chisq()
+```{r}
+qdist.chisq = function(object, ...){
+  quantile = object$quantile
+  return(structure(list(quantile = quantile), class = "qdist.chisq"))
+}
+```
+## Define rdist.chisq()
+```{r}
+rdist.chisq = function(object, ...){
+  random_gen = object$random_gen
+  return(structure(list(random_gen = random_gen), class = "rdist.chisq"))
+}
+```
+## Define default functions
+```{r}
+mdist.default = function(x, ...) {
+  cat("\nIn mdist(x,...), 'x' could only be 'chisq()'. Check the input.\n")
+}
+vdist.default = function(x, ...) {
+  cat("\nIn vdist(x,...), 'x' could only be 'chisq()'. Check the input.\n")
+}
+ddist.default = function(x, ...) {
+  cat("\nIn ddist(x,...), 'x' could only be 'chisq()'. Check the input.\n")
+}
+pdist.default = function(x, ...) {
+  cat("\nIn pdist(x,...), 'x' could only be 'chisq()'. Check the input.\n")
+}
+qdist.default = function(x, ...) {
+  cat("\nIn qdist(x,...), 'x' could only be 'chisq()'. Check the input.\n")
+}
+rdist.default = function(x, ...) {
+  cat("\nIn rdist(x,...), 'x' could only be 'chisq()'. Check the input.\n")
+}
+```
+
+### Example 0
+```{r}                       
+mdist(t)                      # check the default message
+vdist(t)
+ddist(t)
+pdist(t)
+qdist(t)
+rdist(t)
+```
+### Examples 1
+```{r}
+x = chisq(1,21) 
+mdist(x)
+vdist(x)
+ddist(x)
+pdist(x)
+qdist(x)
+rdist(x)
+```
+### Examples 2
+```{r, eval= FALSE}
+x = chisq(-1,21)    # this line would be ignored
+mdist(x)
+vdist(x)
+ddist(x)
+pdist(x)
+qdist(x)
+rdist(x)
+```
+### Examples 3
+```{r}
+x = chisq(0,21)  
+mdist(x)
+vdist(x)
+ddist(x)
+pdist(x)
+qdist(x)
+rdist(x)
+```
+### Examples 4
+```{r}
+x = chisq(10,21)  
+mdist(x)
+vdist(x)
+ddist(x)
+pdist(x)
+qdist(x)         # get NaNs
+rdist(x)
+```
+### Examples 5
+```{r}
+x = chisq(0.5,21)  
+mdist(x)
+vdist(x)
+ddist(x)
+pdist(x)
+qdist(x)
+rdist(x)         # get an empty vector
+```
+
+## Provide a print() function for the results of: mdist(x, ...), vdist(x,...)
+```{r}
+print.mdist.chisq = function(object, ...){
+  cat("\nMean:\n")
+  print(object$mean)
+}
+```
+```{r}
+print.vdist.chisq = function(object, ...){
+  cat("\nVariance:\n")
+  print(object$variance)
+}
+```
+### Example 6
+```{r}
+y = mdist(x)
+print(y)
+y = vdist(x)
+print(y)
+```
+
+## Create a summary of randomness vector.
+```{r}
+summary.mdist.chisq = function(object, ...){
+  return(summary = summary(object$mean))
+  }
+```
+
+```{r}
+summary.vdist.chisq = function(object, ...){
+  return(summary = summary(object$variance))
+  }
+```
+
+```{r}
+summary.ddist.chisq = function(object, ...){
+  return(summary = summary(object$density))
+}
+```
+
+```{r}
+summary.pdist.chisq = function(object, ...){
+  return(summary = summary(object$probability))
+}
+```
+
+```{r}
+summary.qdist.chisq = function(object, ...){
+  return(summary = summary(object$quantile))
+}
+```
+
+```{r}
+summary.rdist.chisq = function(object, ...){
+  return(summary = summary(object$random_gen))
+}
+```
+
+### Example 7
+```{r}
+x = chisq(0.5,11)
+y = mdist(x)
+summary(y)
+y = vdist(x)
+summary(y)
+y = ddist(x)
+summary(y)
+y = pdist(x)
+summary(y)
+y = qdist(x)
+summary(y)
+y = rdist(x)
+summary(y)
+```
